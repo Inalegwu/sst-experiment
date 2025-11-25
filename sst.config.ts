@@ -12,8 +12,6 @@ export default $config({
     };
   },
   async run() {
-    const storage = await import("./infra/storage");
-
     const outputs = {};
 
     const {readdirSync} = await import("node:fs");
