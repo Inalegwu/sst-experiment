@@ -1,22 +1,23 @@
-import { Glob} from "bun";
 import path from "node:path";
 import * as fs from "node:fs";
+import {glob } from "node:fs/promises";
 
-export default function AppSyncApi(){
+export default async function AppSyncApi(){
 
-  const appRoots = new Glob("packages/*/Resolvers").scanSync({
-    cwd:process.cwd()
-  });
+  const appRoots=glob("packages/*/Resolvers",{
+    cwd:process.cwd(),
+    withFileTypes:true
+  })
 
   console.log("Detected Resolver Roots");
 
   const dataSources :Record<string,sst.aws.AppSyncDataSourceArgs>= {};
   const resolvers :Record < string, {name:string,dataSource:string}>= {};
 
-  for (const root of appRoots){
+  for await (const root of appRoots){
 
-    fs.readdirSync(root).forEach(typeName=>{
-      const typeDir = path.join(root, typeName);
+    fs.readdirSync(root.parentPath).forEach(typeName=>{
+      const typeDir = path.join(root.parentPath, typeName);
 
       if (!fs.statSync(typeDir).isDirectory()) return;
 
