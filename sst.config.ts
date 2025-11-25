@@ -1,4 +1,6 @@
 /// <reference path="./.sst/platform/config.d.ts" />
+import * as fs from "node:fs";
+import path = require("node:path");
 
 export default $config({
   app(input) {
@@ -11,10 +13,21 @@ export default $config({
   },
   async run() {
     const storage = await import("./infra/storage");
-    await import("./infra/api");
 
-    return {
-      MyBucket: storage.bucket.name,
-    };
+    const outputs = {};
+
+    const {readdirSync} = await import("node:fs");
+
+    for (const value of readdirSync("./infra/")) {
+      console.log({ value });
+
+      const result = await import("./infra/" + value);
+
+      console.log({ result });
+
+      if (result.outputs) Object.assign(outputs, result.outputs);
+    }
+
+    outputs
   },
 });
